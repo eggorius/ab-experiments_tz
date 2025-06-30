@@ -1,5 +1,6 @@
 import math
 import random
+from typing import Optional
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -64,12 +65,17 @@ def bulk_assign_devices(
 
 def set_experiment_status(
     db: Session, experiment_id: int, is_active: bool
-) -> Experiment:
+) -> Optional[Experiment]:
     """Sets is_active column for experiment with experiment_id"""
     exp = db.query(Experiment).get(experiment_id)
+
+    if exp is None:
+        return None
+
     exp.is_active = is_active
     # TODO: Remove all DeviceAssignments?
     db.commit()
+    db.refresh(exp)
     return exp
 
 
